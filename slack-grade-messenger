@@ -36,7 +36,7 @@ Current Grade: {Percent:.2f}% ({Letter} --> {Points})
 
          Breakdown
 ---------------------------
-Assignment: {Assignment:.2f}%
+Assignment: {Assignment:.2f}% (not including contributions)
   Activity: {Activity:.2f}%
       Quiz: {Quiz:.2f}%
      Final: <not yet taken>
@@ -56,7 +56,7 @@ for user in users:
             print(f"Sending to: {user['real_name']} ({student['Name']})")
 
             msg = message_template.format(**student)
-            # client.chat_postMessage(channel=user['id'], text=msg, as_user=True)
+            client.chat_postMessage(channel=user['id'], text=msg, as_user=True)
         else:
             users_not_found.append(email)
     else:
