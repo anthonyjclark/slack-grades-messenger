@@ -20,8 +20,11 @@ with open(csv_filename, mode='r') as csv_file:
     # Use "Email" as the dictionary key
     students = {row["Email"].lower(): row for row in csv_reader}
 
+# print(students)
+# raise SystemExit
+
 # Convert to floats
-float_keys = {"Percent", "Assignment", "Activity", "Quiz"}
+float_keys = {"Percent", "Assignment", "Lab", "Activity", "Quiz"}
 for student in students:
     for key in students[student]:
         if key in float_keys:
@@ -31,16 +34,18 @@ slack_token = sys.argv[2]
 client = slack.WebClient(token=slack_token, ssl=ssl_context)
 
 message_template = """Hello {Name}, here is your grade summary.
+
 ```
 Current Grade: {Percent:.2f}% ({Letter} --> {Points})
 
          Breakdown
 ---------------------------
-Assignment: {Assignment:.2f}% (not including contributions)
+Assignment: {Assignment:.2f}% (not including ratings)
   Activity: {Activity:.2f}%
+       Lab: {Lab:.2f}%
       Quiz: {Quiz:.2f}%
-     Final: <not yet taken>
 ```
+
 If this looks incorrect to you, please contact me ASAP!
 """
 
@@ -56,7 +61,13 @@ for user in users:
             print(f"Sending to: {user['real_name']} ({student['Name']})")
 
             msg = message_template.format(**student)
-            client.chat_postMessage(channel=user['id'], text=msg, as_user=True)
+            try:
+                client.chat_postMessage(channel=user['id'],
+                                        text=msg,
+                                        as_user=True)
+            except slack.errors.SlackApiError as err:
+                print(err)
+
         else:
             users_not_found.append(email)
     else:
